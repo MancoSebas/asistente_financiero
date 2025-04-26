@@ -1,0 +1,1 @@
+- Siempre usa nombres de variables descriptivos.
