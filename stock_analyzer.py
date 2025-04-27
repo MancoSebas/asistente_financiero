@@ -47,48 +47,68 @@ class StockAnalyzer:
         
         print(tickers)
         for ticker in tickers:
-            try:
-                # Create ticker object
-                stock = yf.Ticker(ticker)
-                
+            max_retries = 3
+            retry_count = 0
+            
+            while retry_count < max_retries:
                 try:
-                    # Get data with explicit start and end dates
-                    print(start, end)
-                    # data = stock.history(start=start, end=end, interval='1d')
-                    data = stock.history(period='3d')
-                    print(data)
+                    # Create ticker object with a session
+                    session = requests.Session()
+                    stock = yf.Ticker(ticker, session=session)
                     
-                    if data.empty or len(data) == 0:
-                        print(f"Warning: No data available for {ticker}")
-                        continue
+                    try:
+                        # Get data with explicit start and end dates
+                        print(f"Fetching {ticker}, attempt {retry_count+1}")
+                        # data = stock.history(start=start, end=end, interval='1d')
+                        data = stock.history(period='3d')
+                        #print(data)
+                        
+                        if data.empty or len(data) == 0:
+                            print(f"Warning: No data available for {ticker}")
+                            retry_count += 1
+                            if retry_count < max_retries:
+                                time.sleep(2)  # Wait before retry
+                                continue
+                            else:
+                                break
 
-                    # Get the most recent data point
-                    last_row = data.iloc[-1]
-                    if len(data) > 1:
-                        prev_row = data.iloc[-2]
-                        last_close = last_row["Close"]
-                        prev_close = prev_row["Close"]
-                    else:
-                        last_close = last_row["Close"]
-                        prev_close = last_row["Open"]
+                        # Get the most recent data point
+                        last_row = data.iloc[-1]
+                        if len(data) > 1:
+                            prev_row = data.iloc[-2]
+                            last_close = last_row["Close"]
+                            prev_close = prev_row["Close"]
+                        else:
+                            last_close = last_row["Close"]
+                            prev_close = last_row["Open"]
 
-                    change = last_close - prev_close
-                    percent_change = (change / prev_close) * 100
+                        change = last_close - prev_close
+                        percent_change = (change / prev_close) * 100
 
-                    stock_data.append(StockData(
-                        ticker=ticker,
-                        last_close=float("{:.2f}".format(last_close)),
-                        change=float("{:.2f}".format(change)),
-                        percent_change=float("{:.2f}".format(percent_change))
-                    ))
-                    
+                        stock_data.append(StockData(
+                            ticker=ticker,
+                            last_close=float("{:.2f}".format(last_close)),
+                            change=float("{:.2f}".format(change)),
+                            percent_change=float("{:.2f}".format(percent_change))
+                        ))
+                        print(f"Successfully fetched data for {ticker}")
+                        break  # Break out of retry loop on success
+                        
+                    except Exception as e:
+                        print(f"Error fetching history for {ticker}: {str(e)}")
+                        retry_count += 1
+                        if retry_count < max_retries:
+                            time.sleep(2)  # Wait before retry
+                        else:
+                            print(f"Maximum retries reached for {ticker}")
+                        
                 except Exception as e:
-                    print(f"Error fetching history for {ticker}: {str(e)}")
-                    continue
-                    
-            except Exception as e:
-                print(f"Error creating ticker object for {ticker}: {str(e)}")
-                continue
+                    print(f"Error creating ticker object for {ticker}: {str(e)}")
+                    retry_count += 1
+                    if retry_count < max_retries:
+                        time.sleep(2)  # Wait before retry
+                    else:
+                        print(f"Maximum retries reached for {ticker}")
                 
         if not stock_data:
             raise ValueError("Could not fetch data for any of the provided tickers. Please try different symbols.")
