@@ -19,6 +19,13 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key')
 # Initialize the stock analyzer
 analyzer = StockAnalyzer(os.getenv('GEMINI_API_KEY'))
 
+# Define sectors and their stocks
+SECTORS = {
+    'Technology': ['AAPL', 'MSFT', 'GOOGL', 'META'],
+    'Financial': ['JPM', 'BAC', 'GS', 'MS'],
+    'Healthcare': ['JNJ', 'PFE', 'UNH', 'ABBV']
+}
+
 # Define news sources
 news_sources = [
     NewsSource("Yahoo Finance", "https://finance.yahoo.com/topic/stock-market-news/", "h3"),
@@ -42,21 +49,27 @@ def analyze():
         # Generate market summary
         summary = analyzer.generate_market_summary(stock_data, news_sources)
 
-        # Format stock data for display
-        formatted_stock_data = [
-            {
-                'ticker': stock.ticker,
-                'last_close': f"${stock.last_close:.2f}",
-                'change': f"{stock.change:+.2f}",
-                'percent_change': f"{stock.percent_change:+.2f}%"
-            }
-            for stock in stock_data
-        ]
+        # Generate sector-specific analysis
+        sector_analysis = {}
+        for sector, sector_tickers in SECTORS.items():
+            # Filter the analyzed stocks that belong to this sector
+            sector_stocks = [stock for stock in stock_data if stock.ticker in sector_tickers]
+            if sector_stocks:
+                sector_analysis[sector.lower()] = analyzer.generate_sector_analysis(sector, sector_stocks)
 
         return jsonify({
             'success': True,
-            'stock_data': formatted_stock_data,
-            'summary': summary
+            'stock_data': [
+                {
+                    'ticker': stock.ticker,
+                    'last_close': stock.last_close,
+                    'change': stock.change,
+                    'percent_change': stock.percent_change
+                }
+                for stock in stock_data
+            ],
+            'summary': summary,
+            'sector_analysis': sector_analysis
         })
     except Exception as e:
         return jsonify({

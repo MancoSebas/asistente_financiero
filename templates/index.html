@@ -7,150 +7,337 @@
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
+        :root {
+            --color-primary: #1E2A38;
+            --color-accent-positive: #27AE60;
+            --color-secondary: #7F8C8D;
+            --color-accent-alert: #F39C12;
+            --color-background: #F5F7FA;
+            --color-text: #2C3E50;
+        }
+        
         body {
             font-family: 'Lato', sans-serif;
-        }
-        .loading {
-            display: none;
-        }
-        .loading.active {
-            display: block;
-        }
-        .scrollable-content {
-            max-height: calc(100vh - 24rem);  /* Increased space for padding */
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: #CBD5E0 #EDF2F7;
-        }
-        .scrollable-content::-webkit-scrollbar {
-            width: 8px;
-        }
-        .scrollable-content::-webkit-scrollbar-track {
-            background: #EDF2F7;
-            border-radius: 4px;
-        }
-        .scrollable-content::-webkit-scrollbar-thumb {
-            background-color: #CBD5E0;
-            border-radius: 4px;
-            border: 2px solid #EDF2F7;
-        }
-        .main-container {
             min-height: 100vh;
             padding-bottom: 10vh;
+            background-color: var(--color-background);
+            color: var(--color-text);
         }
-        .content-panel {
+        
+        .loading-overlay {
+            background-color: rgba(30, 42, 56, 0.3); /* Using the primary color with 0.3 opacity */
+            backdrop-filter: blur(4px);
+        }
+        
+        .bg-primary {
+            background-color: var(--color-primary);
+        }
+        
+        .text-primary {
+            color: var(--color-primary);
+        }
+        
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #283848;
+        }
+        
+        .positive-change {
+            color: var(--color-accent-positive);
+            font-weight: 500;
+        }
+        
+        .negative-change {
+            color: var(--color-accent-alert);
+            font-weight: 500;
+        }
+        
+        .scrollable-content {
+            max-height: calc(100vh - 24rem);
+            overflow-y: auto;
+        }
+        
+        .analysis-container {
+            height: calc(100% - 60px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--color-secondary) var(--color-background);
+            padding-right: 10px;
+        }
+        
+        .analysis-wrapper {
+            height: 600px;
             display: flex;
             flex-direction: column;
-            max-height: calc(100vh - 20rem); /* Control panel height */
         }
-        .panel-content {
-            flex: 1;
-            overflow: hidden;
+        
+        .analysis-container::-webkit-scrollbar {
+            width: 6px;
         }
-        /* Apply Lato font weights */
-        h1, h2 {
-            font-family: 'Lato', sans-serif;
-            font-weight: 700;
+        
+        .analysis-container::-webkit-scrollbar-track {
+            background: var(--color-background);
+            border-radius: 3px;
         }
-        p, div {
-            font-family: 'Lato', sans-serif;
-            font-weight: 400;
+        
+        .analysis-container::-webkit-scrollbar-thumb {
+            background-color: var(--color-secondary);
+            border-radius: 3px;
         }
-        .text-light {
-            font-weight: 300;
+        
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            margin-top: 100px;
+        }
+        
+        .card {
+            background-color: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-highlight {
+            background-color: white;
+            border: 2px solid var(--color-primary);
+            box-shadow: 0 4px 12px rgba(30, 42, 56, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .input-highlight:hover {
+            box-shadow: 0 6px 16px rgba(30, 42, 56, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .input-field {
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(30, 42, 56, 0.1);
+            outline: none;
+        }
+
+        .placeholder-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            background: linear-gradient(
+                90deg,
+                var(--color-background) 0%,
+                #ffffff 50%,
+                var(--color-background) 100%
+            );
+            background-size: 200% 100%;
+        }
+
+        @keyframes pulse {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        .placeholder-text {
+            color: var(--color-secondary);
+            opacity: 0.7;
+            font-style: italic;
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <div class="container mx-auto px-8 py-24 main-container">
+<body>
+    <div class="main-container">
         <!-- Title Section -->
         <header class="text-center mb-16">
-            <h1 class="text-4xl font-bold text-gray-800">Stock Market Analyzer</h1>
+            <h1 class="text-6xl font-bold text-primary">Stock Market Analysis</h1>
         </header>
 
         <!-- Main Content Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- Left Panel -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <!-- Left Column -->
             <div class="space-y-8">
                 <!-- User Input Section -->
-                <div class="bg-white rounded-lg shadow-md p-8">
-                    <form id="stockForm" class="space-y-4">
+                <div class="input-highlight p-8 rounded-lg mb-8">
+                    <h2 class="text-2xl font-semibold text-primary mb-6">Enter Stock Symbols</h2>
+                    <form id="stockForm" class="space-y-6">
                         <div>
-                            <label for="tickers" class="block text-sm font-medium text-gray-700 mb-1">
-                                Enter Stock Tickers (comma-separated)
-                            </label>
+                            <label for="tickers" class="block text-sm font-medium text-secondary mb-2">Stock Symbols (comma-separated)</label>
                             <input type="text" id="tickers" name="tickers" 
-                                   class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                   placeholder="e.g., AAPL,GOOGL,MSFT">
-                            <p class="mt-1 text-sm text-gray-500">
+                                   class="input-field w-full px-4 py-3 rounded-md text-lg"
+                                   placeholder="e.g., AAPL, GOOGL, MSFT">
+                            <p class="mt-2 text-sm text-secondary">
                                 Default stocks: {{ default_tickers|join(', ') }}
                             </p>
                         </div>
                         <button type="submit" 
-                                class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                            Analyze
+                                class="w-full btn-primary py-3 px-6 rounded-md text-lg font-medium transition-all hover:transform hover:scale-[1.02]">
+                            Analyze Stocks
                         </button>
                     </form>
-
-                    <div id="loading" class="loading mt-4 text-center">
-                        <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
-                        <p class="mt-2 text-gray-600">Analyzing market data...</p>
-                    </div>
-
-                    <div id="error" class="mt-4 hidden">
-                        <div class="bg-red-50 border-l-4 border-red-400 p-4">
-                            <div class="flex">
-                                <div class="flex-shrink-0">
-                                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                                    </svg>
-                                </div>
-                                <div class="ml-3">
-                                    <p id="errorMessage" class="text-sm text-red-700"></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Table Results Section -->
-                <div id="stockData" class="bg-white rounded-lg shadow-md p-8 hidden">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Stock Data</h2>
+                <div id="stockData" class="card p-6">
+                    <h2 class="text-xl font-semibold text-primary mb-4">Stock Data</h2>
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                        <table class="min-w-full divide-y divide-secondary">
+                            <thead class="bg-primary">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ticker</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Close</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Change</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">% Change</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Ticker</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Last Close</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Change</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">% Change</th>
                                 </tr>
                             </thead>
-                            <tbody id="stockTableBody" class="bg-white divide-y divide-gray-200">
+                            <tbody id="stockTableBody" class="bg-white divide-y divide-secondary">
+                                <!-- Placeholder rows -->
+                                <tr>
+                                    <td colspan="4" class="px-4 py-8 text-center">
+                                        <p class="placeholder-text">Enter stock symbols above to view market data</p>
+                                        <div class="mt-4 space-y-2">
+                                            <div class="h-2 placeholder-pulse rounded w-3/4 mx-auto"></div>
+                                            <div class="h-2 placeholder-pulse rounded w-2/3 mx-auto"></div>
+                                            <div class="h-2 placeholder-pulse rounded w-1/2 mx-auto"></div>
+                                        </div>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Panel -->
-            <div id="marketAnalysis" class="bg-white rounded-lg shadow-md p-8 hidden content-panel">
+            <!-- Right Column -->
+            <div class="card p-6 analysis-wrapper">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-semibold text-gray-800">Market Analysis</h2>
-                    <button id="exportPdf" 
-                            class="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 hidden">
-                        <span class="flex items-center">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            Export PDF
-                        </span>
+                    <h2 class="text-xl font-semibold text-primary">Market Analysis</h2>
+                    <button id="exportPdf" class="text-primary hover:text-secondary flex items-center transition-colors" disabled>
+                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Export PDF
                     </button>
                 </div>
-                <div class="panel-content">
-                    <div class="scrollable-content h-full">
-                        <div id="analysisContent" class="prose max-w-none text-gray-600 space-y-4">
+                <div id="analysisContent" class="prose max-w-none space-y-4 analysis-container">
+                    <div class="text-center py-8">
+                        <p class="placeholder-text mb-6">Market analysis will appear here</p>
+                        <div class="space-y-3">
+                            <div class="h-2 placeholder-pulse rounded w-full"></div>
+                            <div class="h-2 placeholder-pulse rounded w-5/6"></div>
+                            <div class="h-2 placeholder-pulse rounded w-4/6"></div>
+                            <div class="h-2 placeholder-pulse rounded w-3/4"></div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sector-specific Insights -->
+        <div class="mt-12">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold text-primary">Sector-specific Insights</h2>
+                <button id="changeSectorsBtn" class="btn-primary px-4 py-2 rounded-md transition-colors flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Change Sectors
+                </button>
+            </div>
+            <div id="sectorCards" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Default placeholder sector cards -->
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold text-primary mb-4">Technology</h3>
+                    <div class="space-y-4">
+                        <div class="space-y-3">
+                            <div class="h-2 placeholder-pulse rounded w-full"></div>
+                            <div class="h-2 placeholder-pulse rounded w-5/6"></div>
+                            <div class="h-2 placeholder-pulse rounded w-4/6"></div>
+                        </div>
+                        <button class="mt-4 btn-primary px-4 py-2 rounded-md transition-colors opacity-50 cursor-not-allowed" disabled>
+                            View Details
+                        </button>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold text-primary mb-4">Financial</h3>
+                    <div class="space-y-4">
+                        <div class="space-y-3">
+                            <div class="h-2 placeholder-pulse rounded w-full"></div>
+                            <div class="h-2 placeholder-pulse rounded w-5/6"></div>
+                            <div class="h-2 placeholder-pulse rounded w-4/6"></div>
+                        </div>
+                        <button class="mt-4 btn-primary px-4 py-2 rounded-md transition-colors opacity-50 cursor-not-allowed" disabled>
+                            View Details
+                        </button>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold text-primary mb-4">Healthcare</h3>
+                    <div class="space-y-4">
+                        <div class="space-y-3">
+                            <div class="h-2 placeholder-pulse rounded w-full"></div>
+                            <div class="h-2 placeholder-pulse rounded w-5/6"></div>
+                            <div class="h-2 placeholder-pulse rounded w-4/6"></div>
+                        </div>
+                        <button class="mt-4 btn-primary px-4 py-2 rounded-md transition-colors opacity-50 cursor-not-allowed" disabled>
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sector Selection Overlay -->
+        <div id="sectorOverlay" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center">
+            <div class="card p-6 max-w-2xl w-full mx-4 max-h-[80vh] flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-primary">Select Sectors (Choose 3)</h3>
+                    <button id="closeSectorOverlay" class="text-secondary hover:text-primary">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="overflow-y-auto flex-grow">
+                    <div id="sectorList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        <!-- Sector checkboxes will be dynamically updated -->
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end">
+                    <button id="applySectors" class="btn-primary px-6 py-2 rounded-md transition-colors">
+                        Apply Selection
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="loading hidden fixed inset-0 loading-overlay flex items-center justify-center">
+            <div class="card p-6">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-accent-positive border-t-transparent"></div>
+                <p class="mt-2 text-secondary">Analyzing market data...</p>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="error" class="hidden fixed bottom-4 right-4">
+            <div class="bg-accent-alert bg-opacity-10 border-l-4 border-accent-alert p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-accent-alert" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p id="errorMessage" class="text-sm text-accent-alert"></p>
                     </div>
                 </div>
             </div>
@@ -158,27 +345,18 @@
     </div>
 
     <script>
-        let currentStockData = null;
-        let currentSummary = null;
-
         document.getElementById('stockForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const loading = document.getElementById('loading');
             const stockData = document.getElementById('stockData');
-            const marketAnalysis = document.getElementById('marketAnalysis');
+            const analysisContent = document.getElementById('analysisContent');
             const error = document.getElementById('error');
             const stockTableBody = document.getElementById('stockTableBody');
-            const analysisContent = document.getElementById('analysisContent');
             const errorMessage = document.getElementById('errorMessage');
-            const exportPdf = document.getElementById('exportPdf');
 
-            // Show loading, hide results and error
-            loading.classList.add('active');
-            stockData.classList.add('hidden');
-            marketAnalysis.classList.add('hidden');
-            exportPdf.classList.add('hidden');
-            error.classList.add('hidden');
+            loading.style.display = 'flex';
+            error.style.display = 'none';
 
             try {
                 const formData = new FormData(e.target);
@@ -190,71 +368,61 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // Store current data for PDF export
-                    currentStockData = data.stock_data;
-                    currentSummary = data.summary;
+                    // Update stock table with new color classes
+                    stockTableBody.innerHTML = data.stock_data.map(stock => `
+                        <tr>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-primary">${stock.ticker}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm text-secondary">$${stock.last_close}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm ${parseFloat(stock.change) >= 0 ? 'positive-change' : 'negative-change'}">${stock.change}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm ${parseFloat(stock.percent_change) >= 0 ? 'positive-change' : 'negative-change'}">${stock.percent_change}%</td>
+                        </tr>
+                    `).join('');
 
-                    // Clear existing table content
-                    stockTableBody.innerHTML = '';
-
-                    // Update stock table with new data
-                    data.stock_data.forEach(stock => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${stock.ticker}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${stock.last_close}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm ${parseFloat(stock.change) >= 0 ? 'text-green-600' : 'text-red-600'}">${stock.change}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm ${parseFloat(stock.percent_change) >= 0 ? 'text-green-600' : 'text-red-600'}">${stock.percent_change}</td>
-                        `;
-                        stockTableBody.appendChild(row);
-                    });
-
-                    // Update analysis content with proper paragraph formatting
-                    analysisContent.innerHTML = data.summary
-                        .split('\n\n')
-                        .map(paragraph => paragraph.trim())
-                        .filter(paragraph => paragraph.length > 0)
-                        .map(paragraph => `<p class="leading-relaxed">${paragraph}</p>`)
+                    // Update analysis content
+                    analysisContent.innerHTML = data.summary.split('\n\n')
+                        .filter(para => para.trim())
+                        .map(para => `<p class="text-secondary leading-relaxed">${para.trim()}</p>`)
                         .join('');
 
-                    // Show results and export button
-                    stockData.classList.remove('hidden');
-                    marketAnalysis.classList.remove('hidden');
-                    exportPdf.classList.remove('hidden');
+                    // Update sector analysis
+                    if (data.sector_analysis) {
+                        if (data.sector_analysis.technology) {
+                            document.getElementById('techAnalysis').textContent = data.sector_analysis.technology;
+                        }
+                        if (data.sector_analysis.financial) {
+                            document.getElementById('financeAnalysis').textContent = data.sector_analysis.financial;
+                        }
+                        if (data.sector_analysis.healthcare) {
+                            document.getElementById('healthcareAnalysis').textContent = data.sector_analysis.healthcare;
+                        }
+                    }
+
+                    stockData.style.display = 'block';
                 } else {
                     throw new Error(data.error || 'An error occurred');
                 }
             } catch (err) {
+                console.error('Error:', err);
                 errorMessage.textContent = err.message;
-                error.classList.remove('hidden');
+                error.style.display = 'block';
             } finally {
-                loading.classList.remove('active');
+                loading.style.display = 'none';
             }
         });
 
+        // Export PDF functionality
         document.getElementById('exportPdf').addEventListener('click', async () => {
-            if (!currentStockData || !currentSummary) return;
-
             try {
                 const response = await fetch('/export-pdf', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        stock_data: currentStockData,
-                        summary: currentSummary
-                    })
                 });
-
+                
                 if (response.ok) {
-                    // Create a blob from the PDF Stream
                     const blob = await response.blob();
-                    // Create a link to download it
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `market_analysis_${new Date().toISOString().slice(0,10)}.pdf`;
+                    a.download = 'market_analysis.pdf';
                     document.body.appendChild(a);
                     a.click();
                     window.URL.revokeObjectURL(url);
@@ -262,9 +430,102 @@
                 } else {
                     throw new Error('Failed to generate PDF');
                 }
-            } catch (err) {
-                console.error('Error generating PDF:', err);
-                alert('Error generating PDF. Please try again.');
+            } catch (error) {
+                console.error('Error exporting PDF:', error);
+                alert('Failed to export PDF. Please try again.');
+            }
+        });
+
+        // Sector selection functionality
+        const sectorOverlay = document.getElementById('sectorOverlay');
+        const changeSectorsBtn = document.getElementById('changeSectorsBtn');
+        const closeSectorOverlay = document.getElementById('closeSectorOverlay');
+        const applySectors = document.getElementById('applySectors');
+        const sectorList = document.getElementById('sectorList');
+        const sectorCards = document.getElementById('sectorCards');
+
+        // Available sectors
+        const availableSectors = [
+            'Technology',
+            'Financial',
+            'Healthcare',
+            'Energy',
+            'Consumer Discretionary',
+            'Consumer Staples',
+            'Industrial',
+            'Materials',
+            'Utilities',
+            'Real Estate',
+            'Telecommunications'
+        ];
+
+        // Selected sectors (default to the first three)
+        let selectedSectors = ['Technology', 'Financial', 'Healthcare'];
+
+        // Populate sector checkboxes
+        function populateSectorCheckboxes() {
+            sectorList.innerHTML = availableSectors.map(sector => `
+                <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
+                    <input type="checkbox" 
+                           class="sector-checkbox form-checkbox h-5 w-5 text-primary" 
+                           value="${sector}"
+                           ${selectedSectors.includes(sector) ? 'checked' : ''}>
+                    <span class="ml-3 text-gray-700">${sector}</span>
+                </label>
+            `).join('');
+
+            // Add event listeners to new checkboxes
+            const checkboxes = document.querySelectorAll('.sector-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    const checked = document.querySelectorAll('.sector-checkbox:checked');
+                    if (checked.length > 3) {
+                        checkbox.checked = false;
+                    }
+                });
+            });
+        }
+
+        // Initialize sector cards
+        function updateSectorCards() {
+            sectorCards.innerHTML = selectedSectors.map(sector => `
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold text-primary mb-4">${sector}</h3>
+                    <div class="space-y-4">
+                        <p class="text-secondary" id="${sector.toLowerCase().replace(/\s+/g, '')}Analysis">
+                            Loading ${sector} analysis...
+                        </p>
+                        <button class="mt-4 btn-primary px-4 py-2 rounded-md transition-colors">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize the cards with default sectors
+        updateSectorCards();
+
+        // Show overlay
+        changeSectorsBtn.addEventListener('click', () => {
+            populateSectorCheckboxes(); // Populate checkboxes when opening overlay
+            sectorOverlay.classList.remove('hidden');
+        });
+
+        // Hide overlay
+        closeSectorOverlay.addEventListener('click', () => {
+            sectorOverlay.classList.add('hidden');
+        });
+
+        // Apply sector selection
+        applySectors.addEventListener('click', () => {
+            const checked = document.querySelectorAll('.sector-checkbox:checked');
+            if (checked.length === 3) {
+                selectedSectors = Array.from(checked).map(cb => cb.value);
+                updateSectorCards();
+                sectorOverlay.classList.add('hidden');
+            } else {
+                alert('Please select exactly 3 sectors.');
             }
         });
     </script>

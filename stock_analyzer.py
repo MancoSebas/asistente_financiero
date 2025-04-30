@@ -202,6 +202,39 @@ class StockAnalyzer:
 
         Write in a professional tone, using clear language while providing substantial analysis. Separate major sections with line breaks for readability."""
 
+    def generate_sector_analysis(self, sector: str, stocks: List[StockData]) -> str:
+        """Generate analysis for a specific sector."""
+        if not stocks:
+            return ""
+            
+        # Create a prompt for sector-specific analysis
+        stock_info = "\n".join([
+            f"{stock.ticker}: ${stock.last_close} ({stock.percent_change:+.2f}%)"
+            for stock in stocks
+        ])
+        
+        prompt = f"""
+        As a senior financial analyst, provide a concise sector analysis for the {sector} sector based on the following stocks:
+
+        {stock_info}
+
+        Focus on:
+        1. Overall sector performance
+        2. Key trends and patterns
+        3. Major factors affecting the sector
+        4. Brief outlook
+
+        Keep the analysis focused and limit to 2-3 sentences.
+        Avoid any special formatting or bullet points.
+        """
+        
+        try:
+            response = self.model.generate_content(prompt)
+            return response.text.strip()
+        except Exception as e:
+            print(f"Error generating sector analysis: {str(e)}")
+            return f"Unable to generate analysis for {sector} sector."
+
 def main():
     # Configuration
     GEMINI_API_KEY = "YOUR_GEMINI_API_KEY"  # Replace with your actual API key
