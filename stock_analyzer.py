@@ -26,7 +26,7 @@ class StockAnalyzer:
         self.gemini_api_key = gemini_api_key
         self.default_tickers = ["AAPL", "MSFT", "AMZN", "GOOGL", "META"]
         genai.configure(api_key=gemini_api_key)
-        self.model = genai.GenerativeModel('gemini-pro')
+        self.model = genai.GenerativeModel('Gemini 2.5 Flash Preview 04-17')
         
     def get_stock_data(self, tickers: List[str] = None) -> List[StockData]:
         if tickers is None:
