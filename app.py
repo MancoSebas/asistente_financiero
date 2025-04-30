@@ -1,14 +1,7 @@
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify
 from stock_analyzer import StockAnalyzer, NewsSource
 import os
 from dotenv import load_dotenv
-from datetime import datetime
-import tempfile
-from reportlab.lib import colors
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 
 # Load environment variables
 load_dotenv()
@@ -77,120 +70,6 @@ def analyze():
             'error': str(e)
         }), 500
 
-@app.route('/export-pdf', methods=['POST'])
-def export_pdf():
-    try:
-        data = request.json
-        stock_data = data.get('stock_data', [])
-        summary = data.get('summary', '')
-
-        # Create temporary file
-        with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as tmp:
-            # Create the PDF document
-            doc = SimpleDocTemplate(
-                tmp.name,
-                pagesize=letter,
-                rightMargin=72,
-                leftMargin=72,
-                topMargin=72,
-                bottomMargin=72
-            )
-
-            # Create styles
-            styles = getSampleStyleSheet()
-            title_style = styles['Heading1']
-            heading_style = styles['Heading2']
-            normal_style = styles['Normal']
-            
-            # Custom paragraph style for the summary
-            summary_style = ParagraphStyle(
-                'SummaryStyle',
-                parent=normal_style,
-                spaceBefore=12,
-                spaceAfter=12,
-                leading=14
-            )
-
-            # Create the document content
-            content = []
-
-            # Add title
-            content.append(Paragraph("Market Analysis Report", title_style))
-            content.append(Spacer(1, 20))
-
-            # Add timestamp
-            content.append(Paragraph(
-                f"Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-                normal_style
-            ))
-            content.append(Spacer(1, 20))
-
-            # Add stock data section
-            content.append(Paragraph("Stock Data", heading_style))
-            content.append(Spacer(1, 12))
-
-            # Create stock data table
-            table_data = [['Ticker', 'Last Close', 'Change', '% Change']]
-            for stock in stock_data:
-                table_data.append([
-                    stock['ticker'],
-                    stock['last_close'],
-                    stock['change'],
-                    stock['percent_change']
-                ])
-
-            # Create table style
-            table_style = TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 10),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
-                ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-                ('FONTSIZE', (0, 1), (-1, -1), 9),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('GRID', (0, 0), (-1, -1), 1, colors.black),
-                ('ALIGN', (0, 0), (0, -1), 'LEFT'),
-            ])
-
-            # Create table and add to content
-            table = Table(table_data)
-            table.setStyle(table_style)
-            content.append(table)
-            content.append(Spacer(1, 20))
-
-            # Add market analysis section
-            content.append(Paragraph("Market Analysis", heading_style))
-            content.append(Spacer(1, 12))
-
-            # Split summary into paragraphs and add them
-            paragraphs = summary.split('\n\n')
-            for para in paragraphs:
-                if para.strip():
-                    content.append(Paragraph(para.strip(), summary_style))
-                    content.append(Spacer(1, 12))
-
-            # Build the PDF document
-            doc.build(content)
-            
-            # Return the PDF file
-            return send_file(
-                tmp.name,
-                mimetype='application/pdf',
-                as_attachment=True,
-                download_name=f'market_analysis_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
-            )
-
-    except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-
 if __name__ == '__main__':
-    # Use environment variable for port with a default value
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=False) 
